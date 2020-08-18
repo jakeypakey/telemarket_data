@@ -36,14 +36,17 @@ class Database:
 
 	#Parse, clean and 'compress' data for storage in db
 	def loadCsvToDB(self,dbName,fileName):
+		#This descibes the datatypes/mappings for SQL
+		#tinyint - 0, smallint-1, int-2
   	#['age; - TINYINT
 		dictionary = { "age": 0,
 		#"job"; - CHAR - ad(M)in, (B)lue-collar, (E)ntrepreneur, (H)ousemaid, (M)anagement, (R)etired, sel(F)-employed, ser(V)ices, (S)tudent, (T)echnician, (U)nemplyed, unknown(?)
-		"job": {"admin": 'M', "blue-collar": 'B', "entrepreneur": 'E', "housemaid": 'H', "management": 'M', "retired": 'R', "self-employed": 'F', "technician": 'T', "unemployed": 'U', "unknown": '?'},
+		"job": {"admin.": 'M', "blue-collar": 'B', "entrepreneur": 'E', "housemaid": 'H', "management": 'M', "retired": 'R', 
+			"self-employed": 'F', "services": 'V', "student": 'S', "technician": 'T', "unemployed": 'U', "unknown": '?'},
 		#"marital"; - CHAR -  (D)ivorced, (M)arried, (S)ingle, unknown(?)
 		"marital": {"divorced": 'D', "married": 'M', "single": 'S', "unknown": '?'},
 		#"education"; - CHAR - (P)rimary, (S)econdary, (T)ertiary, unknown(?)
-		"education": {"primary": "P", "secondary": 'S', "Tertiary": 'T', "unknown": '?'},
+		"education": {"primary": "P", "secondary": 'S', "tertiary": 'T', "unknown": '?'},
 		#"default"; - CHAR - (Y)es, (N)o, unknown(?)
 		"default": {"yes": 'Y', "no": 'N', "unknown": '?'},
 		#"balance"; -  INTEGER
@@ -57,7 +60,7 @@ class Database:
 		#"day"; - TINYINT 
 		"day": 0, 
 		#"month"; TINYINT - (1-12) <-> (jan-dec)
-		"month": 0,
+		"month": {"jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12},
 		#"duration"; - SMALLINT
 		"duration": 1,
 		#"campaign"; - TINYINT
@@ -67,7 +70,7 @@ class Database:
 		#"previous"; - TINYINT
 		"previous": 0,
 		#"poutcome"; - CHAR - (S)uccess, (F)ailure, (O)ther, unknown(?)
-		"poutcome": {"success": 'S', "failure": 'F', "Other": 'O', "unknown": '?'},
+		"poutcome": {"success": 'S', "failure": 'F', "other": 'O', "unknown": '?'},
 		#"y"' - CHAR - (Y)es, (N)o
 		"y": {"yes": 'Y', "no": 'N'}}
 		with open(fileName) as fi:
@@ -77,26 +80,22 @@ class Database:
 
 	
       #['58;"management";"married";"tertiary";"no";2143;"yes";"no";"unknown";5;"may";261;1;-1;0;"unknown";"no"']
+			count = 0
 			for row in reader:
 				if firstRow:
 					print(row)
       		#get first line of .csv, the catagories
 					catagories = [ item for item in row]
-					#This descibes the datatypes for SQL
-					#
-					#Dict = {1: 'Geeks', 2: 'For', 3: {'A' : 'Welcome', 'B' : 'To', 'C' : 'Geeks'}} 
-					# 
-					#tinyint - 0, smallint-1, int-2
-
-					
-
-
-					
 					firstRow = False
 				else:
-					print(catagories)
-					print(row)
-					break
+					print("ROW: {}".format(count))
+					for i in range(len(catagories)):
+						print('catagory: {}'.format(catagories[i]))
+						if isinstance(dictionary[catagories[i]],dict):
+							print(dictionary[catagories[i]][row[i]])
+						else:
+							print(int(row[i]))
+				count+=1
         
         
 
