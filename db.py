@@ -6,7 +6,7 @@ import csv
 class Database:
 	def __init__(self):
 		self.connection = self.connectToDB("localhost","root","acidrain","bank_data")
-
+		self.query("USE bank_pred")
 	def connectToDB(self,host,user,password,database=None):
 		connection = None
 		try:
@@ -29,7 +29,7 @@ class Database:
 		cursor = self.connection.cursor()
 		try:
 			cursor.execute(queryString)
-			connection.commit()
+			self.connection.commit()
 			print(queryString)
 		except Error as e:
  			print("Error {} occured.".format(e))
@@ -37,14 +37,14 @@ class Database:
 	def queryMany(self,string,parameters):
 		cursor = self.connection.cursor()
 		try:
-			#cursor.executemany(string,parameters)
-			#connection.commit()
+			cursor.executemany(string,parameters)
+			self.connection.commit()
 			print("{} with {} parameters".format(string,len(parameters)))
 		except Error as e:
  			print("Error {} occured.".format(e))
 
 
-	#Parse, clean and 'compress' data for storage in db
+	#create table
 	def loadCsvToDB(self,dbName,fileName):
 		#This descibes the datatypes/mappings for SQL
 		#tinyint - 0, smallint-1, int-2
@@ -77,8 +77,8 @@ class Database:
 		"campaign": 0,
 		#"pdays"; - SMALLINT
 		"pdays": 1,
-		#"previous"; - TINYINT
-		"previous": 0,
+		#"previous"; - SMALLINT
+		"previous": 1,
 		#"poutcome"; - CHAR - (S)uccess, (F)ailure, (O)ther, unknown(?)
 		"poutcome": {"success": 'S', "failure": 'F', "other": 'O', "unknown": '?'},
 		#"y"' - CHAR - (Y)es, (N)o
@@ -100,7 +100,7 @@ class Database:
 											 duration SMALLINT,
 											 campaign TINYINT,
 											 pdays SMALLINT,
-											 previous TINYINT,
+											 previous SMALLINT,
 											 poutcome CHAR(1),
 											 y CHAR(1),
 											 PRIMARY KEY (id)) ENGINE = InnoDB
@@ -111,11 +111,11 @@ class Database:
 																						loan, contact, day, month,
 																						duration, campaign, pdays,
 																						previous, poutcome, y )
-																	 VALUES ( %d, %c, %c, %c, 
-																	 					%c, %d, %c, 
-																						%c, %c, %d, %d, 
-																						%d, %d, %d, 
-																						%d, %d, %c,  )"""
+																	 VALUES ( %s, %s, %s, %s, 
+																	 					%s, %s, %s, 
+																						%s, %s, %s, %s, 
+																						%s, %s, %s, 
+																						%s, %s, %s  )"""
 		with open(fileName) as fi:
 			reader = csv.reader(fi,delimiter=';')
 			firstRow = True
@@ -149,11 +149,12 @@ class Database:
 
 					params.append(tuple(entry))
 				count+=1
+			print(params[29183])
 			self.queryMany(insert_query,params)
-        
-        
 
 
+        
+        
 
 database = Database()
 database.loadCsvToDB(None,"/Users/jake/proj/data/bank_marketing/bank-full.csv")
