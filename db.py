@@ -1,6 +1,7 @@
 import mysql.connector 
 from mysql.connector import Error
 import csv
+import copy
 
 dictionaryShort = { "age": 0,
 		#"job"; - CHAR - ad(M)in, (B)lue-collar, (E)ntrepreneur, (H)ousemaid, (M)anagement, (R)etired, sel(F)-employed, ser(V)ices, (S)tudent, (T)echnician, (U)nemplyed, unknown(?)
@@ -97,7 +98,8 @@ class Database:
 		cursor = self.connection.cursor()
 		queryString = "USE {}".format(name)
 		try:
-			cursor.execute(queryString) self.connection.commit()
+			cursor.execute(queryString) 
+			self.connection.commit()
 			print(queryString)
 		except Error as e:
 			print("Error {} occured.".format(e))
@@ -212,7 +214,30 @@ class Database:
 
 						params.append(tuple(entry))
 				self.queryMany(insert_query,params)
+
+	#process and 'reverse' dictionaries used to read data in so they can be used by data analyzer
 	def getMaps(self):
+		#make deep copies, don't mess with data input dicts..
+		mapAdditional = copy.deepcopy(dictionaryAdditional)
+		mapShort = copy.deepcopy(dictionaryShort)
+
+		#default was removed from the data because it appears to be a SQL keyword
+		mapAdditional['isDefault'] = mapAdditional.pop('default')
+		mapShort['isDefault'] = mapShort.pop('default')
+		#inv_map = {v: k for k, v in my_map.items()}
+
+		for key in mapShort.keys():
+			if isinstance(mapShort[key],dict):
+				mapShort[key] = {val: ke for ke, val in mapShort[key].items()}
+
+		for key in mapAdditional.keys():
+			if isinstance(mapAdditional[key],dict):
+				mapAdditional[key] = {val: ke for ke, val in mapAdditional[key].items()}
+
+		return (mapShort,mapAdditional)
+			
+
+				
 
 
 #This descibes the datatypes/mappings for SQL
@@ -283,7 +308,9 @@ VALUES ( %s, %s, %s, %s,
 #items = database.getEntries('people',0,5)
 
 
-#database = Database("bank_data")
+database = Database("bank_data")
 #database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,createQueryShort,insertQueryShort,';') 
 #database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-additional/bank-additional-full.csv",dictionaryAdditional,createQueryAdditional,insertQueryAdditional,';') 
 #database.connection.close()
+
+print(database.getMaps()[0])
