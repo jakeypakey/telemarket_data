@@ -239,7 +239,6 @@ class Database:
 
 				
 
-
 #This descibes the datatypes/mappings for SQL
 #tinyint - 0, smallint-1, int-2
 #['age; - TINYINT
@@ -308,9 +307,8 @@ VALUES ( %s, %s, %s, %s,
 #items = database.getEntries('people',0,5)
 
 
-database = Database("bank_data")
+#database = Database("bank_data")
 #database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,createQueryShort,insertQueryShort,';') 
 #database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-additional/bank-additional-full.csv",dictionaryAdditional,createQueryAdditional,insertQueryAdditional,';') 
 #database.connection.close()
 
-print(database.getMaps()[0])
