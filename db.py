@@ -233,7 +233,6 @@ class Database:
 		for key in mapAdditional.keys():
 			if isinstance(mapAdditional[key],dict):
 				mapAdditional[key] = {val: ke for ke, val in mapAdditional[key].items()}
-
 		return (mapShort,mapAdditional)
 			
 

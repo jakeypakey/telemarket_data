@@ -56,7 +56,7 @@ def generateLabels(peopleMap,peopleAdditionalMap):
 					labelsPeople.append(key+':'+peopleMap[key][ke])
 
 	for key in peopleAdditionalMap.keys():
-		if isinstance(peopleAdditionalMap[key],int) or key=='month' or 'day_of_week':
+		if isinstance(peopleAdditionalMap[key],int) or key=='month' or key=='day_of_week':
 			labelsPeopleAdditional.append(key)
 		else:
 			if len(peopleAdditionalMap[key].keys()) == 2:
