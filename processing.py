@@ -41,7 +41,36 @@ def generateProcMaps(peopleMap,peopleAdditionalMap):
 	peopleAdditionalIndex-=1
 	return (dataProcPeople,dataProcPeopleAdditional,peopleIndex,peopleAdditionalIndex)
 
+def generateLabels(peopleMap,peopleAdditionalMap):
+	labelsPeople = []
+	labelsPeopleAdditional = []
+
+	for key in peopleMap.keys():
+		if isinstance(peopleMap[key],int) or key=='month':
+			labelsPeople.append(key)
+		else:
+			if len(peopleMap[key].keys()) == 2:
+				labelsPeople.append(key)
+			else:
+				for ke in peopleMap[key].keys():
+					labelsPeople.append(key+':'+peopleMap[key][ke])
+
+	for key in peopleAdditionalMap.keys():
+		if isinstance(peopleAdditionalMap[key],int) or key=='month' or 'day_of_week':
+			labelsPeopleAdditional.append(key)
+		else:
+			if len(peopleAdditionalMap[key].keys()) == 2:
+				labelsPeopleAdditional.append(key)
+			else:
+				for ke in peopleAdditionalMap[key].keys():
+					labelsPeopleAdditional.append(key+':'+peopleAdditionalMap[key][ke])
+
+	return (labelsPeople,labelsPeopleAdditional)
+	
+
+
+
 #use processing vectors to translate into final processing form
 def translate(proc,raw,size):
 	vector = np.zeros(size)
-	
+		
