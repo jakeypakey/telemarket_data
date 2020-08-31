@@ -221,18 +221,21 @@ class Database:
 		mapAdditional = copy.deepcopy(dictionaryAdditional)
 		mapShort = copy.deepcopy(dictionaryShort)
 
-		#default was removed from the data because it appears to be a SQL keyword
-		mapAdditional['isDefault'] = mapAdditional.pop('default')
-		mapShort['isDefault'] = mapShort.pop('default')
-		#inv_map = {v: k for k, v in my_map.items()}
+
 
 		for key in mapShort.keys():
 			if isinstance(mapShort[key],dict):
 				mapShort[key] = {val: ke for ke, val in mapShort[key].items()}
 
+		#reorder to reflect original ordering, change default to reflect database
+		mapShort = dict( ('isDefault', v) if k == 'default' else (k, v) for k, v in mapShort.items() )
+
 		for key in mapAdditional.keys():
 			if isinstance(mapAdditional[key],dict):
 				mapAdditional[key] = {val: ke for ke, val in mapAdditional[key].items()}
+
+		#reorder to reflect original ordering, change default to reflect database
+		mapAdditional = dict( ('isDefault', v) if k == 'default' else (k, v) for k, v in mapAdditional.items() )
 		return (mapShort,mapAdditional)
 			
 

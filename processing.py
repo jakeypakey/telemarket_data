@@ -20,7 +20,7 @@ def generateProcMaps(peopleMap,peopleAdditionalMap):
 				for ke, val in peopleMap[key].items():
 					subMap[ke] = peopleIndex
 					peopleIndex+=1
-					dataProcPeople.append(subMap)
+				dataProcPeople.append(subMap)
             
 	peopleAdditionalIndex = 0
 	for key in peopleAdditionalMap.keys():
@@ -36,10 +36,9 @@ def generateProcMaps(peopleMap,peopleAdditionalMap):
 				for ke, val in peopleAdditionalMap[key].items():
 					subMap[ke] = peopleAdditionalIndex
 					peopleAdditionalIndex+=1
-					dataProcPeopleAdditional.append(subMap)
-	peopleIndex-=1
-	peopleAdditionalIndex-=1
-	return (dataProcPeople,dataProcPeopleAdditional,peopleIndex,peopleAdditionalIndex)
+				dataProcPeopleAdditional.append(subMap)
+
+	return (dataProcPeople,dataProcPeopleAdditional)
 
 def generateLabels(peopleMap,peopleAdditionalMap):
 	labelsPeople = []
@@ -72,5 +71,6 @@ def generateLabels(peopleMap,peopleAdditionalMap):
 
 #use processing vectors to translate into final processing form
 def translate(proc,raw,size):
-	vector = np.zeros(size)
+#	data = np.zeros(size)
+	#for p in zip(proc,raw):
 		
