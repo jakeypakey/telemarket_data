@@ -30,7 +30,7 @@ def generateProcMaps(peopleMap,peopleAdditionalMap):
 		else:
 			subMap = {}
 			if len(peopleAdditionalMap[key].keys()) == 2:
-				dataProcPeopleAdditional.append(peopleIndex)
+				dataProcPeopleAdditional.append(peopleAdditionalIndex)
 				peopleAdditionalIndex+=1
 			else:
 				for ke, val in peopleAdditionalMap[key].items():
@@ -67,10 +67,29 @@ def generateLabels(peopleMap,peopleAdditionalMap):
 	return (labelsPeople,labelsPeopleAdditional)
 	
 
-
-
 #use processing vectors to translate into final processing form
 def translate(proc,raw,size):
-#	data = np.zeros(size)
-	#for p in zip(proc,raw):
-		
+	#first remove ID from vector
+	print(type(raw))	
+	print('translating: {}'.format(raw))
+	data = np.zeros(size)
+	for p,r in zip(proc,list(raw)):
+		print('p: {}, r: {}'.format(p,r))
+		#raw data is numeric or binary
+		if isinstance(p,int):
+			#data is numeric
+			if not isinstance(r,str):
+				data[p] = float(r)
+			#data is binary (Y/N)
+			elif r=='Y':
+				data[p] = 1.0
+			#else data[p] = 0
+		#raw data is catagorical:encode as one-hot
+		else:
+			data[p[r]] = 1.0
+	return data
+
+#translate numeric data to binary
+def numericToBinary(data,index,values,binValue,otherBin):
+	data[index] = binValue if data[index] in values else otherBin
+	return data

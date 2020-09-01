@@ -143,12 +143,25 @@ class Database:
 			print("Error {} occured.".format(e))
 
     #get entries on [indexStart,indexStop)
-	def getEntries(self,table,indexStart,indexStop):
+		#specify if ID needed (programmer imposed keys for DB)
+
+	def getEntries(self,table,indexStart,indexStop,inclID=False):
 		cursor = self.connection.cursor()
 		queryString = "SELECT * from {} LIMIT {}, {}".format(table,indexStart,indexStop)
 		try:
 			cursor.execute(queryString)
-			return cursor.fetchall()
+			#do not use list form if single entry
+			if (indexStop-indexStart) == 1:
+				if inclID:
+					return cursor.fetchall()[0]
+				else:
+					return cursor.fetchall()[0][1:]
+			else:
+				if inclID:
+					return cursor.fetchall()[0]
+				else:
+					#exclude IDs and return
+					return [ entry[1:] for entry in cursor.fetchall() ]
 		except Error as e:
 			print("Error {} occured.".format(e))
 
