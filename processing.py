@@ -70,11 +70,8 @@ def generateLabels(peopleMap,peopleAdditionalMap):
 #use processing vectors to translate into final processing form
 def translate(proc,raw,size):
 	#first remove ID from vector
-	print(type(raw))	
-	print('translating: {}'.format(raw))
 	data = np.zeros(size)
 	for p,r in zip(proc,list(raw)):
-		print('p: {}, r: {}'.format(p,r))
 		#raw data is numeric or binary
 		if isinstance(p,int):
 			#data is numeric
@@ -93,3 +90,7 @@ def translate(proc,raw,size):
 def numericToBinary(data,index,values,binValue,otherBin):
 	data[index] = binValue if data[index] in values else otherBin
 	return data
+
+def display(labels,data):
+	for label,entry in zip(labels,data):
+		print('{} : {}'.format(label,entry))
