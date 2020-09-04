@@ -3,8 +3,8 @@ from mysql.connector import Error
 import csv
 import copy
 import pandas as pd
-from sql_strings import dictionaryAdditional, createQueryAdditionl, insertQueryAdditional,
-												dictionaryShort, createQueryShort, insertQuertShort
+from sql_strings import dictionaryAdditional, createQueryAdditional, \
+		insertQueryAdditional, dictionaryShort, createQueryShort, insertQueryShort
 
 
 class Database:
@@ -115,6 +115,19 @@ class Database:
 		
 	#create table, load data in and convert verbose fields to CHAR to save space	
 	def loadCsvToDB(self,fileName,dictionary,create_query,insert_query,delimiter):
+		csvDict = {}
+		for key,value in dictionaryShort.items():
+			if isinstance(value,dict):
+				csvDict[key] = value
+		for chunk in pd.read_csv(fileName,chunksize = 10,sep=';'):
+			chunk = chunk.replace(csvDict)
+			chunk = chunk.rename(columns={'default':'isDefault'})
+			print(chunk)
+			#ready for DB
+			print(chunk.values)
+			break
+			
+
 		
 		
 
@@ -155,8 +168,9 @@ class Database:
 #items = database.getEntries('people',0,5)
 
 
-#database = Database("bank_data")
-#database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,createQueryShort,insertQueryShort,';') 
+database = Database("bank_data")
+#preprocess dict to only contain needed items
+database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,createQueryShort,insertQueryShort,';') 
 #database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-additional/bank-additional-full.csv",dictionaryAdditional,createQueryAdditional,insertQueryAdditional,';') 
 #database.connection.close()
 
