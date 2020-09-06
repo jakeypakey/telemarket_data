@@ -114,25 +114,20 @@ class Database:
 			print("Error {} occured.".format(e))
 		
 	#create table, load data in and convert verbose fields to CHAR to save space	
-	def loadCsvToDB(self,fileName,dictionary,create_query,insert_query,delimiter):
+	def loadCsvToDB(self,fileName,dictionary,delimiter,insertQuery,createQuery=None,chunkSize=1000):
+		#create dictionary that only has strings which require character mapping for pd.replace()
 		csvDict = {}
-		for key,value in dictionaryShort.items():
+		for key,value in dictionary.items():
 			if isinstance(value,dict):
 				csvDict[key] = value
-		for chunk in pd.read_csv(fileName,chunksize = 10,sep=';'):
+		#create the table if needed
+		if not createQuery == None:
+			self.query(createQuery)
+		#process chunkwise
+		for chunk in pd.read_csv(fileName,chunksize=chunkSize,delimiter=';'):
+			#dataframe now a lsit for insertion to database
 			chunk = chunk.replace(csvDict)
-			chunk = chunk.rename(columns={'default':'isDefault'})
-			print(chunk)
-			#ready for DB
-			print(chunk.values)
-			break
-			
-
-		
-		
-
-
-
+			self.queryMany(insertQuery,[tuple(entry) for entry in chunk.values])
 
 
 	#process and 'reverse' dictionaries used to read data in so they can be used by data analyzer
@@ -166,11 +161,11 @@ class Database:
 
 
 #items = database.getEntries('people',0,5)
-
-
 database = Database("bank_data")
 #preprocess dict to only contain needed items
-database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,createQueryShort,insertQueryShort,';') 
-#database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-additional/bank-additional-full.csv",dictionaryAdditional,createQueryAdditional,insertQueryAdditional,';') 
+
+database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,';',insertQueryShort,createQueryShort) 
+
+database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-additional/bank-additional-full.csv",dictionaryAdditional,';',insertQueryAdditional,createQueryAdditional) 
 #database.connection.close()
 

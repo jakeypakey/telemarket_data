@@ -89,6 +89,8 @@ dictionaryAdditional = { "age": 0,
 #This descibes the datatypes/mappings for SQL
 #tinyint - 0, smallint-1, int-2
 #['age; - TINYINT
+
+#   age job marital education default  balance housing loan contact  day  month  duration  campaign  pdays  previous poutcome  y
 insertQueryShort = """INSERT INTO people ( age, job, maritial, education, 
 isDefault, balance, housing,
 loan, contact, day, month,
