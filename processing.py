@@ -112,13 +112,32 @@ def getDataFrame(entries,proc):
 	df = pd.DataFrame(data=entries,columns=proc.keys())
 	return df.replace(replaceMap)
 
-def getOneHot(df,proc):
+
+##WARNING##
+##use independent=True to drop a single one-hot col for each catagory
+def getOneHot(df,proc,dropFirst=False):
+	binaryRep = {}
 	replaceMap = {}
 	for key,value in proc.items():
 		if isinstance(value,dict):
-			replaceMap[key] = value
+			if not value == {'Y': 'yes', 'N': 'no'}:
+				replaceMap[key] = list(value.values())
+			else: 
+				binaryRep[key] = {'yes': 1, 'no': 0}
 
-	df = pd.get_dummies(df,columns=replaceMap.keys())
-	print(df)
+	df = df.replace(binaryRep)
 
+	for key in replaceMap.keys():
+		#form up catagorical one hots
+		temp = df[key].astype(pd.CategoricalDtype(replaceMap[key]))
+		temp =	pd.get_dummies(temp,prefix=key)
+		#drop one catagorical column if needed
+		if dropFirst:
+			temp = temp.drop(-1,axis='columns')
+		tempLoc = df.columns.get_loc(key)
+		df = df.drop(key,axis='columns')
+		for col in temp.columns:
+			df.insert(tempLoc,col,temp[col])
+
+	return df
 

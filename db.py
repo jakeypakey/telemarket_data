@@ -142,6 +142,8 @@ class Database:
 
 		#reorder to reflect original ordering, change default to reflect database
 		mapShort = dict( ('isDefault', v) if k == 'default' else (k, v) for k, v in mapShort.items() )
+		#remove month map, it was only needed to turn the data numeric
+		mapShort['month'] = 0
 
 		for key in mapAdditional.keys():
 			if isinstance(mapAdditional[key],dict):
