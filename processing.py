@@ -136,8 +136,14 @@ def getOneHot(df,proc,dropFirst=False):
 			temp = temp.drop(-1,axis='columns')
 		tempLoc = df.columns.get_loc(key)
 		df = df.drop(key,axis='columns')
-		for col in temp.columns:
+		for col in reversed(temp.columns):
 			df.insert(tempLoc,col,temp[col])
 
+	print(df.loc[ (df['pdays']!=999) & (df['pdays']!=-1) ])
+	df.loc[ ((df['pdays']!=999) & (df['pdays']!=-1)) ,'pdays'] = 1
+	df.loc[(df['pdays']!=1),'pdays'] = 0
+
+	print('inside of ONE HOT')
+	print(df)
 	return df
 
