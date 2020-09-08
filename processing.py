@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 #use information from dictionaries used to process data to
 #genereate translation vectors which allow catagorical
 #things to be translated into one hot vectors
@@ -94,3 +95,30 @@ def numericToBinary(data,index,values,binValue,otherBin):
 def display(labels,data):
 	for label,entry in zip(labels,data):
 		print('{} : {}'.format(label,entry))
+
+#get list of fields from SQL, translate to verbose df 
+def getDataFrame(entries,proc):
+	#preprocess map
+	replaceMap = {}
+	for key,value in proc.items():
+		if isinstance(value,dict):
+			replaceMap[key] = value
+
+	#figure out what to do here..
+	#if this is a tuple, only one entry
+	if isinstance(entries,tuple):
+		return entries
+		
+	df = pd.DataFrame(data=entries,columns=proc.keys())
+	return df.replace(replaceMap)
+
+def getOneHot(df,proc):
+	replaceMap = {}
+	for key,value in proc.items():
+		if isinstance(value,dict):
+			replaceMap[key] = value
+
+	df = pd.get_dummies(df,columns=replaceMap.keys())
+	print(df)
+
+

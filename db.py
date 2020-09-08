@@ -136,8 +136,6 @@ class Database:
 		mapAdditional = copy.deepcopy(dictionaryAdditional)
 		mapShort = copy.deepcopy(dictionaryShort)
 
-
-
 		for key in mapShort.keys():
 			if isinstance(mapShort[key],dict):
 				mapShort[key] = {val: ke for ke, val in mapShort[key].items()}
@@ -154,18 +152,16 @@ class Database:
 		return (mapShort,mapAdditional)
 			
 
-				
-
 
 
 
 
 #items = database.getEntries('people',0,5)
-database = Database("bank_data")
+#database = Database("bank_data")
 #preprocess dict to only contain needed items
 
-database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,';',insertQueryShort,createQueryShort) 
+#database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-full.csv",dictionaryShort,';',insertQueryShort,createQueryShort) 
 
-database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-additional/bank-additional-full.csv",dictionaryAdditional,';',insertQueryAdditional,createQueryAdditional) 
+#database.loadCsvToDB("/Users/jake/proj/data/bank_marketing/bank-additional/bank-additional-full.csv",dictionaryAdditional,';',insertQueryAdditional,createQueryAdditional) 
 #database.connection.close()
 
