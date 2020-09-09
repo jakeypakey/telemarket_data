@@ -1,100 +1,5 @@
 import numpy as np
 import pandas as pd
-#use information from dictionaries used to process data to
-#genereate translation vectors which allow catagorical
-#things to be translated into one hot vectors
-
-def generateProcMaps(peopleMap,peopleAdditionalMap):
-	peopleIndex = 0
-	dataProcPeople = []
-	dataProcPeopleAdditional = []
-	for key in peopleMap.keys():
-		if isinstance(peopleMap[key],int) or key=='month':
-			dataProcPeople.append(peopleIndex)
-			peopleIndex+=1
-		else:
-			subMap = {}
-			if len(peopleMap[key].keys()) == 2:
-				dataProcPeople.append(peopleIndex)
-				peopleIndex+=1
-			else:
-				for ke, val in peopleMap[key].items():
-					subMap[ke] = peopleIndex
-					peopleIndex+=1
-				dataProcPeople.append(subMap)
-            
-	peopleAdditionalIndex = 0
-	for key in peopleAdditionalMap.keys():
-		if isinstance(peopleAdditionalMap[key],int) or key=='month' or key=='day_of_week':
-			dataProcPeopleAdditional.append(peopleAdditionalIndex)
-			peopleAdditionalIndex+=1
-		else:
-			subMap = {}
-			if len(peopleAdditionalMap[key].keys()) == 2:
-				dataProcPeopleAdditional.append(peopleAdditionalIndex)
-				peopleAdditionalIndex+=1
-			else:
-				for ke, val in peopleAdditionalMap[key].items():
-					subMap[ke] = peopleAdditionalIndex
-					peopleAdditionalIndex+=1
-				dataProcPeopleAdditional.append(subMap)
-
-	return (dataProcPeople,dataProcPeopleAdditional)
-
-def generateLabels(peopleMap,peopleAdditionalMap):
-	labelsPeople = []
-	labelsPeopleAdditional = []
-
-	for key in peopleMap.keys():
-		if isinstance(peopleMap[key],int) or key=='month':
-			labelsPeople.append(key)
-		else:
-			if len(peopleMap[key].keys()) == 2:
-				labelsPeople.append(key)
-			else:
-				for ke in peopleMap[key].keys():
-					labelsPeople.append(key+':'+peopleMap[key][ke])
-
-	for key in peopleAdditionalMap.keys():
-		if isinstance(peopleAdditionalMap[key],int) or key=='month' or key=='day_of_week':
-			labelsPeopleAdditional.append(key)
-		else:
-			if len(peopleAdditionalMap[key].keys()) == 2:
-				labelsPeopleAdditional.append(key)
-			else:
-				for ke in peopleAdditionalMap[key].keys():
-					labelsPeopleAdditional.append(key+':'+peopleAdditionalMap[key][ke])
-
-	return (labelsPeople,labelsPeopleAdditional)
-	
-
-#use processing vectors to translate into final processing form
-def translate(proc,raw,size):
-	#first remove ID from vector
-	data = np.zeros(size)
-	for p,r in zip(proc,list(raw)):
-		#raw data is numeric or binary
-		if isinstance(p,int):
-			#data is numeric
-			if not isinstance(r,str):
-				data[p] = float(r)
-			#data is binary (Y/N)
-			elif r=='Y':
-				data[p] = 1.0
-			#else data[p] = 0
-		#raw data is catagorical:encode as one-hot
-		else:
-			data[p[r]] = 1.0
-	return data
-
-#translate numeric data to binary
-def numericToBinary(data,index,values,binValue,otherBin):
-	data[index] = binValue if data[index] in values else otherBin
-	return data
-
-def display(labels,data):
-	for label,entry in zip(labels,data):
-		print('{} : {}'.format(label,entry))
 
 #get list of fields from SQL, translate to verbose df 
 def getDataFrame(entries,proc):
@@ -116,34 +21,66 @@ def getDataFrame(entries,proc):
 ##WARNING##
 ##use independent=True to drop a single one-hot col for each catagory
 def getOneHot(df,proc,dropFirst=False):
-	binaryRep = {}
-	replaceMap = {}
-	for key,value in proc.items():
-		if isinstance(value,dict):
-			if not value == {'Y': 'yes', 'N': 'no'}:
-				replaceMap[key] = list(value.values())
-			else: 
-				binaryRep[key] = {'yes': 1, 'no': 0}
+	replaceMap,binaryRep = processDict(proc,dropFirst)
 
+	#handle binary values
 	df = df.replace(binaryRep)
 
 	for key in replaceMap.keys():
 		#form up catagorical one hots
 		temp = df[key].astype(pd.CategoricalDtype(replaceMap[key]))
+		#get dummie variables for catagory
 		temp =	pd.get_dummies(temp,prefix=key)
-		#drop one catagorical column if needed
-		if dropFirst:
-			temp = temp.drop(-1,axis='columns')
+		#get the location of the temp category to maintain order
 		tempLoc = df.columns.get_loc(key)
+		#drop the old string formatted category
 		df = df.drop(key,axis='columns')
+		#insert colukmns back in
 		for col in reversed(temp.columns):
 			df.insert(tempLoc,col,temp[col])
 
 	print(df.loc[ (df['pdays']!=999) & (df['pdays']!=-1) ])
-	df.loc[ ((df['pdays']!=999) & (df['pdays']!=-1)) ,'pdays'] = 1
+	#pdays is usally a null value of (-1 or 999) or a small integer,
+	#switch this to binary 
+	df.loc[((df['pdays']!=999) & (df['pdays']!=-1)) ,'pdays'] = 1
 	df.loc[(df['pdays']!=1),'pdays'] = 0
 
-	print('inside of ONE HOT')
-	print(df)
 	return df
+
+def processDict(dictionary,dropFirst=False):
+	binaryRep = {}
+	replaceMap = {}
+	for key,value in dictionary.items():
+		if isinstance(value,dict):
+			#if dropFirst, and the catagory is not already binary
+			if dropFirst and not value=={'Y': 'yes', 'N': 'no'}:
+				print('dropped: {}'.format(value.popitem()))
+			#if the value is not binary, add catagories
+			if not value == {'Y': 'yes', 'N': 'no'}:
+				replaceMap[key] = list(value.values())
+			#if the value is binary, use single vector
+			else: 
+				binaryRep[key] = {'yes': 1, 'no': 0}
+	return (replaceMap,binaryRep)
+
+
+
+#this function verifies that all values in the dictionary/dataframe are taken
+#and that no values have not been accounted for
+#this function fails if:
+#1)there is a key remaining in the dictionary after a pass (value not taken) OR
+#2)a unexpected value is encountered (key error will be raised)
+def verifyContents(df,dictionary):
+	dictionary,binaryRep = processDict(dictionary)
+	for category in dictionary.keys():
+		if isinstance(dictionary[category],dict):
+			dictSet = set(dictionary[category].values())
+			inData = set(df[category].unique())
+			if not dictSet == inData:
+				if len(dictSet) > len(inData):
+					print("Value(s): {} occur in DataFrame but NOT IN DATASET".format(dictSet-inData))
+				else:
+					print("Value(s): {} occur in dataset but NOT IN DATAFRAME".format(inData-dictSet))
+				return False
+	return True
 

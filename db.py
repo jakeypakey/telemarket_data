@@ -151,6 +151,9 @@ class Database:
 
 		#reorder to reflect original ordering, change default to reflect database
 		mapAdditional = dict( ('isDefault', v) if k == 'default' else (k, v) for k, v in mapAdditional.items() )
+		mapAdditional['day_of_week'] = 0
+		mapAdditional['month'] = 0
+
 		return (mapShort,mapAdditional)
 			
 
