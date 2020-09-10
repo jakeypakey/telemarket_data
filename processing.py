@@ -77,9 +77,9 @@ def validate(df,dictionary):
 			inData = set(df[category].unique())
 			if not dictSet == inData:
 				if len(dictSet) > len(inData):
-					print("Value(s): {} occur in DataFrame but NOT IN DATASET".format(dictSet-inData))
+					print("Value(s): {} occur in DataFrame but NOT IN DATASET.".format(dictSet-inData))
 				else:
-					print("Value(s): {} occur in dataset but NOT IN DATAFRAME".format(inData-dictSet))
+					print("Value(s): {} occur in dataset but NOT IN DATAFRAME.".format(inData-dictSet))
 				return False
 	return True
 
