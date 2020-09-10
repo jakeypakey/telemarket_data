@@ -39,7 +39,6 @@ def getOneHot(df,proc,dropFirst=False):
 		for col in reversed(temp.columns):
 			df.insert(tempLoc,col,temp[col])
 
-	print(df.loc[ (df['pdays']!=999) & (df['pdays']!=-1) ])
 	#pdays is usally a null value of (-1 or 999) or a small integer,
 	#switch this to binary 
 	df.loc[((df['pdays']!=999) & (df['pdays']!=-1)) ,'pdays'] = 1
@@ -70,7 +69,7 @@ def processDict(dictionary,dropFirst=False):
 #this function fails if:
 #1)there is a key remaining in the dictionary after a pass (value not taken) OR
 #2)a unexpected value is encountered (key error will be raised)
-def verifyContents(df,dictionary):
+def validate(df,dictionary):
 	dictionary,binaryRep = processDict(dictionary)
 	for category in dictionary.keys():
 		if isinstance(dictionary[category],dict):

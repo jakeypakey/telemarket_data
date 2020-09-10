@@ -73,7 +73,7 @@ dictionaryAdditional = { "age": 0,
 		#"previous"; - SMALLINT
 		"previous": 1,
 		#"poutcome"; - CHAR - (S)uccess, (F)ailure, (O)ther, unknown(?), (N)onexistent
-		"poutcome": {"success": 'S', "failure": 'F', "other": 'O', "unknown": '?', "nonexistent":'N'},
+		"poutcome": {"success": 'S', "failure": 'F', "other": 'O',  "nonexistent":'N', "unknown": '?'},
 		#emp.var.rate DECIMAL(3,1)
 		"emp.var.rate": -1,
 		#cons.price.idx DECIMAL(6,3)
