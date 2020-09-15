@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+import logging
+from logging.handlers import RotatingFileHandler
+import time
 
 #get list of fields from SQL, translate to verbose df 
 def getDataFrame(entries,proc):
@@ -82,4 +85,17 @@ def validate(df,dictionary):
 					print("Value(s): {} occur in dataset but NOT IN DATAFRAME.".format(inData-dictSet))
 				return False
 	return True
+
+def setupLog():
+	if not 'my_logger' in logging.Logger.manager.loggerDict.keys():
+		logger = logging.getLogger('my_logger')
+		handler = RotatingFileHandler('./logs/info.log', maxBytes=20000, backupCount=20)
+		logger.addHandler(handler)
+		logger.setLevel(logging.INFO)
+		logger.info('Kernel initialized')
+		logger.info(time.strftime("%D;%H:%M:%S",time.localtime()))
+		logger.info('------------------')
+	else:
+		logger = logging.getLogger('my_logger')
+	return logger
 
