@@ -99,3 +99,70 @@ def setupLog():
 		logger = logging.getLogger('my_logger')
 	return logger
 
+#catMaps - map for organizing catagorical variables
+#titles - axis titles
+#bunches - bunches returned from sci-kit permutation_importance
+def processImportance(catMaps,titles,bunches):
+	#variables with A append are for the extended dataset
+	#unpack variables
+	cols = titles[0]
+	colsA = titles[1]
+
+	bunch = bunches[0]
+	bunchA = bunches[1]
+
+	translator = processDict(catMaps[0])[0]
+	translatorA = processDict(catMaps[1])[0]
+
+	features = {title:mean for title,mean in zip(cols,bunch['importances_mean'])}
+	featuresA = {title:mean for title,mean in zip(colsA,bunchA['importances_mean'])}
+
+	#group for loop
+	translators = (translator,translatorA)
+	featuresz = (features,featuresA)
+
+	#mapShort[key] = {val: ke for ke, val in mapShort[key].items()}
+
+
+	for translator, features in zip(translators,featuresz):
+		print(features)
+		for key in translator.keys():
+			group = []
+			value = 0
+			for title in cols:
+				if title.startswith(key):
+					value+=features[title]
+					features.pop(title)
+			value = np.sqrt(value)
+			features[title] = value
+
+			
+	print(features)
+
+	#get dicts that only include needed variables
+
+
+	#now, we must group catagorical variables together to figure out their importnance
+	#methodology for combining discussed here:https://stats.stackexchange.com/questions/314567/feature-importance-with-dummy-variables
+
+
+
+	
+	#extract features and their relative importance
+
+
+
+
+	featuresByMean = sorted(features, key=lambda key_value: key_value[1],reverse=True)
+	featuresByMeanA = sorted(featuresA, key=lambda key_value: key_value[1],reverse=True)
+
+
+
+
+	means = [info[1] for info in featuresByMean]
+	total = sum(means)
+	#print(total)
+	meanPercentages = [ item/total*100 for item in means ]
+	meanLabels = [str(info[0])+" - "+"{:.4f}%".format(perc) for info,perc in zip(featuresByMean,meanPercentages)]
+
+	return None
