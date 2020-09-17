@@ -102,71 +102,62 @@ def setupLog():
 #catMaps - map for organizing catagorical variables
 #titles - axis titles
 #bunches - bunches returned from sci-kit permutation_importance
-def processImportance(catMaps,titles,bunches,dropFirst=False):
-	#variables with A append are for the extended dataset
-	#unpack variables
-	cols = titles[0]
-	colsA = titles[1]
-
-	bunch = bunches[0]
-	bunchA = bunches[1]
-
-	translator = processDict(catMaps[0],dropFirst)[0]
-	translatorA = processDict(catMaps[1],dropFirst)[0]
-
+def processImportance(catMap,cols,bunch,dropFirst=False):
+	translator = processDict(catMap,dropFirst)[0]
 	features = {title:mean for title,mean in zip(cols,bunch['importances_mean'])}
-	featuresA = {title:mean for title,mean in zip(colsA,bunchA['importances_mean'])}
-
-	#group for loop
-	translators = (translator,translatorA)
-	featuresz = (features,featuresA)
-
-	#mapShort[key] = {val: ke for ke, val in mapShort[key].items()}
-
-
-
-
-	#TODO: IMPLEMENT FOR THE Addiciotnal, also test
-	for translator, features in zip(translators,featuresz):
-		print(translator)
-		for key,value in translator.items{}:
-			if isinstance(value,list):
-				#now we re-add in the overall catagory
-				#and will sum the importances here
-				features[key] = 0
-				for suffix in value:
-					features[key] += features[key+'_'+suffix]
-					features.pop(key+'_'+suffix)
-				features[key] = np.sqrt(features[key])
-
-				
-			
-	print(features)
-
-	#get dicts that only include needed variables
-
 
 	#now, we must group catagorical variables together to figure out their importnance
 	#methodology for combining discussed here:https://stats.stackexchange.com/questions/314567/feature-importance-with-dummy-variables
+	for key,value in translator.items():
+		if isinstance(value,list):
+			#now we re-add in the overall catagory
+			#and will sum the importances here
+			features[key] = 0
+			for suffix in value:
+				features[key] += features[key+'_'+suffix]
+				features.pop(key+'_'+suffix)
+			#take the sqrt of the sum of dummy variables importance's
+			features[key] = np.sqrt(features[key])
 
+				
+	#back to list for sorting	
+	features = [(feature,importance) for feature,importance in features.items()]
 
-
-	
-	#extract features and their relative importance
-
-
-
-
+	#now list sorted by importance
 	featuresByMean = sorted(features, key=lambda key_value: key_value[1],reverse=True)
-	featuresByMeanA = sorted(featuresA, key=lambda key_value: key_value[1],reverse=True)
 
-
-
-
+	#final processing into strings to label visualiztions
 	means = [info[1] for info in featuresByMean]
-	total = sum(means)
-	#print(total)
-	meanPercentages = [ item/total*100 for item in means ]
-	meanLabels = [str(info[0])+" - "+"{:.4f}%".format(perc) for info,perc in zip(featuresByMean,meanPercentages)]
 
-	return None
+	total = sum(means)
+
+	meanPercentages = [item/total*100 for item in means]
+
+	#get index where cumaltive sum of feature importance is greater/eq to 90%
+	cutoff = next(idx for idx, value in enumerate(np.cumsum(meanPercentages)) if (value >= 90))
+	
+	#get features of minor importance
+	rest = meanPercentages[cutoff+1:]
+
+	#reform vectors, combining bottom 10% into 'other'
+	meanPercentages = meanPercentages[:(cutoff+1)]
+	meanPercentages.append(sum(rest))
+
+	#get rest of labels
+	restLabels = [item[0] for item in featuresByMean[cutoff+1:]]
+
+	#get important features
+	featuresByMean = [ item[0] for item in featuresByMean[:cutoff+1] ]
+	featuresByMean.append('other')
+
+	print(featuresByMean)
+
+	#significant factors
+	print(meanPercentages)
+
+	meanLabels = [label+" - "+"{:.4f}%".format(perc) for label,perc in zip(featuresByMean,meanPercentages) ]
+
+	#other factos
+	rest = [label+" - "+"{:.4f}%".format(perc) for label,perc in zip(restLabels,rest)]
+
+	return (meanLabels,meanPercentages,rest)
