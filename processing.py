@@ -102,7 +102,7 @@ def setupLog():
 #catMaps - map for organizing catagorical variables
 #titles - axis titles
 #bunches - bunches returned from sci-kit permutation_importance
-def processImportance(catMaps,titles,bunches):
+def processImportance(catMaps,titles,bunches,dropFirst=False):
 	#variables with A append are for the extended dataset
 	#unpack variables
 	cols = titles[0]
@@ -111,8 +111,8 @@ def processImportance(catMaps,titles,bunches):
 	bunch = bunches[0]
 	bunchA = bunches[1]
 
-	translator = processDict(catMaps[0])[0]
-	translatorA = processDict(catMaps[1])[0]
+	translator = processDict(catMaps[0],dropFirst)[0]
+	translatorA = processDict(catMaps[1],dropFirst)[0]
 
 	features = {title:mean for title,mean in zip(cols,bunch['importances_mean'])}
 	featuresA = {title:mean for title,mean in zip(colsA,bunchA['importances_mean'])}
@@ -124,18 +124,22 @@ def processImportance(catMaps,titles,bunches):
 	#mapShort[key] = {val: ke for ke, val in mapShort[key].items()}
 
 
-	for translator, features in zip(translators,featuresz):
-		print(features)
-		for key in translator.keys():
-			group = []
-			value = 0
-			for title in cols:
-				if title.startswith(key):
-					value+=features[title]
-					features.pop(title)
-			value = np.sqrt(value)
-			features[title] = value
 
+
+	#TODO: IMPLEMENT FOR THE Addiciotnal, also test
+	for translator, features in zip(translators,featuresz):
+		print(translator)
+		for key,value in translator.items{}:
+			if isinstance(value,list):
+				#now we re-add in the overall catagory
+				#and will sum the importances here
+				features[key] = 0
+				for suffix in value:
+					features[key] += features[key+'_'+suffix]
+					features.pop(key+'_'+suffix)
+				features[key] = np.sqrt(features[key])
+
+				
 			
 	print(features)
 
