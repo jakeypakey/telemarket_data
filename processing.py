@@ -3,6 +3,8 @@ import pandas as pd
 import logging
 from logging.handlers import RotatingFileHandler
 import time
+import matplotlib.pyplot as plt
+import matplotlib
 
 #get list of fields from SQL, translate to verbose df 
 def getDataFrame(entries,proc):
@@ -150,14 +152,32 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 	featuresByMean = [ item[0] for item in featuresByMean[:cutoff+1] ]
 	featuresByMean.append('other')
 
-	print(featuresByMean)
 
 	#significant factors
-	print(meanPercentages)
-
 	meanLabels = [label+" - "+"{:.4f}%".format(perc) for label,perc in zip(featuresByMean,meanPercentages) ]
 
 	#other factos
 	rest = [label+" - "+"{:.4f}%".format(perc) for label,perc in zip(restLabels,rest)]
 
 	return (meanLabels,meanPercentages,rest)
+
+def pie(labels,numbers,others,figureNum):
+	COLOR = 'black'
+	matplotlib.rcParams['text.color'] = COLOR
+	matplotlib.rcParams['axes.labelcolor'] = COLOR
+	matplotlib.rcParams['xtick.color'] = COLOR
+	matplotlib.rcParams['ytick.color'] = COLOR
+	plt.figure(figureNum)
+	colors = ['yellowgreen','red','gold','lightskyblue','white','lightcoral','blue','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
+
+	patches, texts = plt.pie(numbers, colors=colors, startangle=90, radius=1.2)
+
+	patches, labels, dummy =  zip(*sorted(zip(patches, labels, numbers),key=lambda x: x[2],reverse=True))
+
+	plt.legend(patches, labels, loc='best', bbox_to_anchor=(-0.1, 1.),fontsize=8)
+
+	plt.savefig('piechart{}.png'.format(figureNum), bbox_inches='tight')
+	plt.show()
+	print('other feautures :')
+	for line in others:
+		print(line)
