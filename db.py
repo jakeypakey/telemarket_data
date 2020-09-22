@@ -8,7 +8,6 @@ from sql_strings import dictionaryAdditional, createQueryAdditional, \
 
 
 class Database:
-    ##TODO: return infromation about tables available, (dictionary which {table_name :{fields[...]}}
 	def __init__(self,name):
 		self.connection = self.connectToDB("localhost","root","acidrain","bank_data")
 		cursor = self.connection.cursor()
