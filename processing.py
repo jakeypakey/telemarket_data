@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+import pandas as pd 
 import logging
 from logging.handlers import RotatingFileHandler
 import time
@@ -41,9 +41,7 @@ def getOneHot(df,proc,dropFirst=False):
 		#drop the old string formatted category
 		df = df.drop(key,axis='columns')
 		#insert colukmns back in
-		for col in reversed(temp.columns):
-			df.insert(tempLoc,col,temp[col])
-
+		for col in reversed(temp.columns): df.insert(tempLoc,col,temp[col])
 	#pdays is usally a null value of (-1 or 999) or a small integer,
 	#switch this to binary 
 	df.loc[((df['pdays']!=999) & (df['pdays']!=-1)) ,'pdays'] = 1
@@ -89,7 +87,9 @@ def validate(df,dictionary):
 	return True
 
 def setupLog():
+	#it appears the functionality is not in Logger documentation, temporary solution
 	if not 'my_logger' in logging.Logger.manager.loggerDict.keys():
+		Path("./logs").mkdir(exist_ok=True)
 		logger = logging.getLogger('my_logger')
 		handler = RotatingFileHandler('./logs/info.log', maxBytes=20000, backupCount=20)
 		logger.addHandler(handler)
@@ -120,39 +120,27 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 				features.pop(key+'_'+suffix)
 			#take the sqrt of the sum of dummy variables importance's
 			features[key] = np.sqrt(features[key])
-
 				
 	#back to list for sorting	
 	features = [(feature,importance) for feature,importance in features.items()]
-
 	#now list sorted by importance
 	featuresByMean = sorted(features, key=lambda key_value: key_value[1],reverse=True)
-
 	#final processing into strings to label visualiztions
 	means = [info[1] for info in featuresByMean]
-
 	total = sum(means)
-
 	meanPercentages = [item/total*100 for item in means]
-
 	#get index where cumaltive sum of feature importance is greater/eq to 90%
 	cutoff = next(idx for idx, value in enumerate(np.cumsum(meanPercentages)) if (value >= 90))
-	
 	#get features of minor importance
 	rest = meanPercentages[cutoff+1:]
 
 	#reform vectors, combining bottom 10% into 'other'
 	meanPercentages = meanPercentages[:(cutoff+1)]
 	meanPercentages.append(sum(rest))
-
 	#get rest of labels
 	restLabels = [item[0] for item in featuresByMean[cutoff+1:]]
-
-	#get important features
 	featuresByMean = [ item[0] for item in featuresByMean[:cutoff+1] ]
 	featuresByMean.append('other')
-
-
 	#significant factors
 	meanLabels = [label+" - "+"{:.4f}%".format(perc) for label,perc in zip(featuresByMean,meanPercentages) ]
 
@@ -161,6 +149,50 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 
 	return (meanLabels,meanPercentages,rest)
 
+
+#catMaps - map for organizing catagorical variables
+#features - features which were significant in model
+#corr - corrolation values with each feautre and output
+def processCorrelation(catMap,features,corr,dropFirst=False):
+	translator,binaryRep = processDict(catMap,dropFirst)
+
+	#clean out category maps for fields which are NOT categorical but ARE binary
+	for key in binaryRep.keys():
+		translator[key] = 0
+	#remove unneeded features from the map
+	for item in set(translator.keys()).difference(features):
+		translator.pop(item)
+
+	#put items back which arent in translator (non-catagorical)
+	for item in set(features).difference(translator.keys()):
+		translator[item] = 0
+	#remove 'other' added from the above
+	translator.pop('other')
+
+	#now generate dictionary with corrolations
+	for item in translator.keys():
+		#process oneHot into nested dict with correlation values
+		if isinstance(translator[item],list):
+			corrDict = {}
+			for suffix in translator[item]:
+				if (item+'_'+suffix) in corr.keys():
+					corrDict[suffix] = corr[item+'_'+suffix]
+		#data is not categorical, just store correlation value
+		else:
+			corrDict = corr[item]
+		translator[item] = corrDict
+
+	#this resolves an issue where a few subcategories have values that are never taken
+	#which stems from the fact that the data turns binary after dropping the subcategory
+	#ideally, this will be removed and any field with near (or at) zero variance will be removed during
+	#extraction from database
+	for key,value in translator.items():
+		if isinstance(value,dict) and set(value.keys()) == set(['yes','no']):
+			translator[key] = value['yes']
+
+	return translator		
+
+
 def pie(labels,numbers,others,figureNum):
 	COLOR = 'black'
 	matplotlib.rcParams['text.color'] = COLOR
@@ -168,7 +200,7 @@ def pie(labels,numbers,others,figureNum):
 	matplotlib.rcParams['xtick.color'] = COLOR
 	matplotlib.rcParams['ytick.color'] = COLOR
 	plt.figure(figureNum)
-	colors = ['yellowgreen','red','gold','lightskyblue','white','lightcoral','blue','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
+	colors = ['yellowgreen','red','gold','lightskyblue','lightcoral','blue','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
 
 	patches, texts = plt.pie(numbers, colors=colors, startangle=90, radius=1.2)
 
@@ -181,3 +213,22 @@ def pie(labels,numbers,others,figureNum):
 	print('other feautures :')
 	for line in others:
 		print(line)
+
+
+def bar(field,data,labels,figureNum,isCategorical=True):
+	matplotlib.rcParams.update({'font.size': 16})
+
+	pairs = [(label,value) for label,value in zip(labels,data)]
+	pairs = sorted(pairs,key=lambda key_value: key_value[1],reverse=True)
+	posPairs = [pair for pair in pairs if pair[1]>0]
+	negPairs = [pair for pair in pairs if pair[1]<=0]
+
+	fig = plt.figure(figureNum,figsize=(2*len(data)+3,len(data)))
+	if isCategorical:
+		ax = plt.subplot(title='Correlation by category of '+field)
+	else:
+		ax = plt.subplot(title='Correlation of important, but non categorical features')
+		
+	ax.bar([item[0] for item in posPairs], [item[1] for item in posPairs], width=1, color='g')
+	ax.bar([item[0] for item in negPairs], [item[1] for item in negPairs], width=1, color='r')
+
