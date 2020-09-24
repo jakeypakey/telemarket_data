@@ -9,13 +9,14 @@ from sql_strings import dictionaryAdditional, createQueryAdditional, \
 
 class Database:
 	def __init__(self,name):
-		self.connection = self.connectToDB("localhost","root","acidrain","bank_data")
+		#not a great way to use password 
+		#TODO: fix later
+		self.connection = self.connectToDB("localhost","root","password","bank_data")
 		cursor = self.connection.cursor()
 		queryString = "USE {}".format(name)
 		try:
 			cursor.execute(queryString) 
 			self.connection.commit()
-			print(queryString)
 		except Error as e:
 			print("Error {} occured.".format(e))
 			self.createDB(name)
@@ -26,7 +27,6 @@ class Database:
 		connection = None
 		try:
 			connection = mysql.connector.connect(host=host,user=user,passwd=password)
-			print("Connected to db\nSuccessful SQL commands are printed on execution.")
 		except Error as e:
 			print("Error: {} occured.".format(e))
 		return connection
@@ -35,7 +35,6 @@ class Database:
 		cursor = self.connection.cursor()
 		try:
 			cursor.execute("CREATE DATABASE {}".format(name))
-			print("Database created.")
 		except Error as e:
 			print("Error {} occured.".format(e))
 
@@ -44,7 +43,6 @@ class Database:
 		try:
 			cursor.execute(queryString)
 			self.connection.commit()
-			print(queryString)
 		except Error as e:
 			print("Error {} occured.".format(e))
 
@@ -53,7 +51,6 @@ class Database:
 		try:
 			cursor.executemany(string,parameters)
 			self.connection.commit()
-			print("{} with {} parameters".format(string,len(parameters)))
 		except Error as e:
 			print("Error {} occured.".format(e))
 
