@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd 
+from pathlib import Path
 import logging
 from logging.handlers import RotatingFileHandler
 import time
@@ -119,6 +120,9 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 				features[key] += features[key+'_'+suffix]
 				features.pop(key+'_'+suffix)
 			#take the sqrt of the sum of dummy variables importance's
+			if features[key] <0:
+				print('Negative importance for feature: {}, setting to zero.'.format(key))
+				features[key] = 0
 			features[key] = np.sqrt(features[key])
 				
 	#back to list for sorting	
@@ -193,6 +197,7 @@ def processCorrelation(catMap,features,corr,dropFirst=False):
 	return translator		
 
 
+#move viz here to declutter notebook
 def pie(labels,numbers,others,figureNum):
 	COLOR = 'black'
 	matplotlib.rcParams['text.color'] = COLOR
@@ -215,6 +220,7 @@ def pie(labels,numbers,others,figureNum):
 		print(line)
 
 
+#move viz here to declutter notebook
 def bar(field,data,labels,figureNum,isCategorical=True):
 	matplotlib.rcParams.update({'font.size': 16})
 
@@ -232,3 +238,24 @@ def bar(field,data,labels,figureNum,isCategorical=True):
 	ax.bar([item[0] for item in posPairs], [item[1] for item in posPairs], width=1, color='g')
 	ax.bar([item[0] for item in negPairs], [item[1] for item in negPairs], width=1, color='r')
 
+#move viz here to declutter notebook
+def hist(data,title,figureNum):
+	mu = np.mean(data)  # mean of distribution
+	sigma = np.std(data)  # standard deviation of distribution
+	x = data
+
+	num_bins = 50
+	plt.figure(figureNum)
+	fig, ax = plt.subplots()
+	# the histogram of the data
+	n, bins, patches = ax.hist(x, num_bins,)
+	# add a 'best fit' line
+	y = ((1 / (np.sqrt(2 * np.pi) * sigma)) *
+     np.exp(-0.5 * (1 / sigma * (bins - mu))**2))
+	ax.plot(bins,y,'--')
+	ax.set_xlabel('Probabilty of prediction')
+	ax.set_ylabel('Frequency')
+	ax.set_title(title)
+	# Tweak spacing to prevent clipping of ylabel
+	fig.tight_layout()
+	plt.show()
