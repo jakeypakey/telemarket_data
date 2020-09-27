@@ -245,7 +245,7 @@ def hist(data,title,figureNum):
 	x = data
 
 	num_bins = 50
-	plt.figure(figureNum)
+	plt.figure(figureNum,figsize=(10,10))
 	fig, ax = plt.subplots()
 	# the histogram of the data
 	n, bins, patches = ax.hist(x, num_bins,)
