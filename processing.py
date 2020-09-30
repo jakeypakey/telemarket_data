@@ -170,8 +170,10 @@ def processCorrelation(catMap,features,corr,dropFirst=False):
 	#put items back which arent in translator (non-catagorical)
 	for item in set(features).difference(translator.keys()):
 		translator[item] = 0
+
 	#remove 'other' added from the above
-	translator.pop('other')
+	if 'other' in translator.keys():
+		translator.pop('other')
 
 	#now generate dictionary with corrolations
 	for item in translator.keys():
