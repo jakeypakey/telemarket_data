@@ -261,3 +261,11 @@ def hist(data,title,figureNum):
 	# Tweak spacing to prevent clipping of ylabel
 	fig.tight_layout()
 	plt.show()
+
+#Should replace this with some sort of accumlator type function later
+def S(s,t,total):
+	count = 0
+	for i in range(int(len(s)*(t/100))):
+		count+=s[i][0]
+	return float(count/total)
+		
