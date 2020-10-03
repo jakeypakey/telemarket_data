@@ -107,10 +107,13 @@ def setupLog():
 #bunches - bunches returned from sci-kit permutation_importance
 def processImportance(catMap,cols,bunch,dropFirst=False):
 	translator = processDict(catMap,dropFirst)[0]
-	features = {title:mean for title,mean in zip(cols,bunch['importances_mean'])}
+	features = {title:mean for title,mean in zip(cols,bunch)}
 
 	#now, we must group catagorical variables together to figure out their importnance
 	#methodology for combining discussed here:https://stats.stackexchange.com/questions/314567/feature-importance-with-dummy-variables
+	print(features.keys())
+	print(translator.keys())
+
 	for key,value in translator.items():
 		if isinstance(value,list):
 			#now we re-add in the overall catagory
@@ -200,12 +203,7 @@ def processCorrelation(catMap,features,corr,dropFirst=False):
 
 
 #move viz here to declutter notebook
-def pie(labels,numbers,others,figureNum):
-	COLOR = 'black'
-	matplotlib.rcParams['text.color'] = COLOR
-	matplotlib.rcParams['axes.labelcolor'] = COLOR
-	matplotlib.rcParams['xtick.color'] = COLOR
-	matplotlib.rcParams['ytick.color'] = COLOR
+def pie(labels,numbers,others,title,figureNum):
 	plt.figure(figureNum)
 	colors = ['yellowgreen','red','gold','lightskyblue','lightcoral','blue','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
 
@@ -214,7 +212,7 @@ def pie(labels,numbers,others,figureNum):
 	patches, labels, dummy =  zip(*sorted(zip(patches, labels, numbers),key=lambda x: x[2],reverse=True))
 
 	plt.legend(patches, labels, loc='best', bbox_to_anchor=(-0.1, 1.),fontsize=8)
-
+	plt.title(title)
 	plt.savefig('piechart{}.png'.format(figureNum), bbox_inches='tight')
 	plt.show()
 	print('other feautures :')
