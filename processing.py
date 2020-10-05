@@ -128,8 +128,10 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 		if features[key] < 0:
 			features[key] = 0
 				
-	#back to list for sorting	
-	features = [(feature,importance) for feature,importance in features.items()]
+	#back to list for sorting, removing negatives
+	features = [(feature,importance) for feature,importance in features.items() if importance>0]
+
+
 	#now list sorted by importance
 	featuresByMean = sorted(features, key=lambda key_value: key_value[1],reverse=True)
 	#final processing into strings to label visualiztions
@@ -154,7 +156,6 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 	#other factos
 	rest = [label+" - "+"{:.4f}%".format(perc) for label,perc in zip(restLabels,rest)]
 
-	print('Values which yield negative importance set to zero.')
 	return (meanLabels,meanPercentages,rest)
 
 
@@ -216,9 +217,6 @@ def pie(labels,numbers,others,title,figureNum):
 	plt.title(title)
 	plt.savefig('piechart{}.png'.format(figureNum), bbox_inches='tight')
 	plt.show()
-	print('other feautures :')
-	for line in others:
-		print(line)
 
 
 #move viz here to declutter notebook
@@ -261,7 +259,7 @@ def hist(data,title,figureNum):
 	fig.tight_layout()
 	plt.show()
 
-#Should replace this with some sort of accumlator type function later
+#Could replace this with some sort of (more efficient) accumlator type function later
 def S(s,t,total):
 	count = 0
 	for i in range(int(len(s)*(t/100))):
