@@ -111,8 +111,6 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 
 	#now, we must group catagorical variables together to figure out their importnance
 	#methodology for combining discussed here:https://stats.stackexchange.com/questions/314567/feature-importance-with-dummy-variables
-	print(features.keys())
-	print(translator.keys())
 
 	for key,value in translator.items():
 		if isinstance(value,list):
@@ -122,11 +120,13 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 			for suffix in value:
 				features[key] += features[key+'_'+suffix]
 				features.pop(key+'_'+suffix)
-			#take the sqrt of the sum of dummy variables importance's
-			if features[key] <0:
-				print('Negative importance for feature: {}, setting to zero.'.format(key))
+			#take the sqrt of the sum of dummy variables importance's after checking for 0
+			if features[key] < 0:
 				features[key] = 0
 			features[key] = np.sqrt(features[key])
+		#check for zero in non catagorical variables
+		if features[key] < 0:
+			features[key] = 0
 				
 	#back to list for sorting	
 	features = [(feature,importance) for feature,importance in features.items()]
@@ -154,6 +154,7 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 	#other factos
 	rest = [label+" - "+"{:.4f}%".format(perc) for label,perc in zip(restLabels,rest)]
 
+	print('Values which yield negative importance set to zero.')
 	return (meanLabels,meanPercentages,rest)
 
 
