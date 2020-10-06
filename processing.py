@@ -125,7 +125,7 @@ def processImportance(catMap,cols,bunch,dropFirst=False):
 				features[key] = 0
 			features[key] = np.sqrt(features[key])
 		#check for zero in non catagorical variables
-		if features[key] < 0:
+		elif features[key] < 0:
 			features[key] = 0
 				
 	#back to list for sorting, removing negatives
